@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import '../models/models.dart';
 import '../widgets/user_avatar.dart';
 
@@ -46,110 +45,6 @@ class UserDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 16),
-
-            // Teste de imagem direta
-            if (user.profileImageBase64 != null &&
-                user.profileImageBase64!.isNotEmpty)
-              Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Teste de Imagem Base64 (Formato AVIF)',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red, width: 2),
-                        ),
-                        child: Builder(
-                          builder: (context) {
-                            try {
-                              String base64String = user.profileImageBase64!;
-                              if (base64String.contains(',')) {
-                                base64String = base64String.split(',')[1];
-                              }
-                              final bytes = base64.decode(base64String);
-
-                              return Image.memory(
-                                bytes,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Center(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.error,
-                                          size: 20,
-                                          color: Colors.red,
-                                        ),
-                                        Text(
-                                          'AVIF não suportado',
-                                          style: TextStyle(fontSize: 8),
-                                        ),
-                                        Text(
-                                          '${bytes.length} bytes',
-                                          style: TextStyle(fontSize: 8),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            } catch (e) {
-                              return Center(
-                                child: Text(
-                                  'Erro: $e',
-                                  style: TextStyle(fontSize: 8),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Flutter não suporta AVIF nativamente.\nUse JPEG, PNG ou WebP.',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.orange[700],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            if (user.profileImageUrl != null &&
-                user.profileImageUrl!.isNotEmpty)
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.green, width: 2),
-                ),
-                child: Image.network(
-                  user.profileImageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Text('Erro URL', style: TextStyle(fontSize: 10)),
-                    );
-                  },
-                ),
-              ),
-
             SizedBox(height: 24),
 
             // Nome do usuário
@@ -226,146 +121,12 @@ class UserDetailScreen extends StatelessWidget {
 
             SizedBox(height: 16),
 
-            // Informações técnicas
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Informações Técnicas',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange[700],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-
-                    _buildInfoRow(
-                      context,
-                      'Tipo de Imagem',
-                      _getImageType(),
-                      Icons.image,
-                    ),
-
-                    if (_isAvifFormat())
-                      Container(
-                        margin: EdgeInsets.only(top: 8),
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange[50],
-                          border: Border.all(color: Colors.orange[300]!),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.warning,
-                              color: Colors.orange[700],
-                              size: 20,
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Formato não suportado',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange[700],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Flutter não suporta AVIF. Use JPEG, PNG ou WebP.',
-                                    style: TextStyle(
-                                      color: Colors.orange[700],
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    if (user.profileImageUrl != null &&
-                        user.profileImageUrl!.isNotEmpty)
-                      _buildInfoRow(
-                        context,
-                        'URL da Imagem',
-                        user.profileImageUrl!,
-                        Icons.link,
-                        isUrl: true,
-                      ),
-
-                    if (user.profileImageBase64 != null &&
-                        user.profileImageBase64!.isNotEmpty)
-                      _buildInfoRow(
-                        context,
-                        'Tamanho da Imagem',
-                        '${(user.profileImageBase64!.length / 1024).round()} KB',
-                        Icons.storage,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-
             SizedBox(height: 32),
 
             // Botões de ação
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  icon: Icon(Icons.bug_report),
-                  label: Text('Debug'),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Debug Info'),
-                        content: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('User ID: ${user.id}'),
-                              Text('Email: ${user.email}'),
-                              Text('Full Name: ${user.fullName}'),
-                              Text(
-                                'Profile Image URL: ${user.profileImageUrl}',
-                              ),
-                              Text(
-                                'Has Base64: ${user.profileImageBase64 != null && user.profileImageBase64!.isNotEmpty}',
-                              ),
-                              if (user.profileImageBase64 != null)
-                                Text(
-                                  'Base64 length: ${user.profileImageBase64!.length}',
-                                ),
-                              Text('Role: ${user.role.name}'),
-                            ],
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-
                 ElevatedButton.icon(
                   icon: Icon(Icons.edit),
                   label: Text('Editar'),
@@ -375,8 +136,11 @@ class UserDetailScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                 ),
+
+                SizedBox(width: 16),
 
                 OutlinedButton.icon(
                   icon: Icon(Icons.arrow_back),
@@ -384,6 +148,9 @@ class UserDetailScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
                 ),
               ],
             ),
@@ -444,39 +211,5 @@ class UserDetailScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getImageType() {
-    if (user.profileImageBase64 != null &&
-        user.profileImageBase64!.isNotEmpty) {
-      // Detectar formato da imagem base64
-      String base64String = user.profileImageBase64!;
-      if (base64String.startsWith('AAAAHGZ0eXBh')) {
-        return 'Arquivo AVIF (Base64) - Não suportado pelo Flutter';
-      } else if (base64String.startsWith('/9j/')) {
-        return 'Arquivo JPEG (Base64)';
-      } else if (base64String.startsWith('iVBOR')) {
-        return 'Arquivo PNG (Base64)';
-      } else if (base64String.startsWith('data:')) {
-        String mimeType = base64String.split(';')[0].split(':')[1];
-        return 'Arquivo $mimeType (Base64)';
-      }
-      return 'Arquivo (Base64)';
-    } else if (user.profileImageUrl != null &&
-        user.profileImageUrl!.isNotEmpty) {
-      return 'URL Externa';
-    } else {
-      return 'Imagem padrão';
-    }
-  }
-
-  bool _isAvifFormat() {
-    if (user.profileImageBase64 != null &&
-        user.profileImageBase64!.isNotEmpty) {
-      String base64String = user.profileImageBase64!;
-      return base64String.startsWith('AAAAHGZ0eXBh') ||
-          base64String.contains('data:image/avif');
-    }
-    return false;
   }
 }

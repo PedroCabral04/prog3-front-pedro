@@ -1,0 +1,27 @@
+# Dependências básicas do FastAPI
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Banco de dados
+sqlalchemy==2.0.23
+alembic==1.12.1
+
+# Validação e serialização
+pydantic[email]==2.5.0
+
+# Autenticação e segurança
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-decouple==3.8
+
+# Processamento de imagens
+Pillow==10.1.0
+pillow-avif-plugin==1.4.3
+
+# CORS e middleware
+fastapi-cors==0.0.6
+
+# Testes (opcional)
+pytest==7.4.3
+httpx==0.25.2

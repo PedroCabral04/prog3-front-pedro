@@ -24,13 +24,37 @@ class UserAvatar extends StatelessWidget {
       return true;
     }
 
-    // Verifica pela assinatura do base64 (fallback para dados sem cabeçalho)
+    // Verifica pela assinatura do base64 (importante para casos onde o cabeçalho foi mudado)
     String cleanBase64 = base64String;
     if (cleanBase64.contains(',')) {
       cleanBase64 = cleanBase64.split(',')[1];
     }
 
+    // Assinatura AVIF: mesmo que o cabeçalho diga JPEG, se o conteúdo é AVIF, não vai funcionar
     return cleanBase64.startsWith('AAAAHGZ0eXBh');
+  }
+
+  /// Constrói um widget informativo sobre o estado da conversão
+  Widget _buildConversionInfoFallback() {
+    return CircleAvatar(
+      radius: size / 2,
+      backgroundColor: backgroundColor ?? Colors.blue[100],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.sync, size: size * 0.35, color: Colors.blue[800]),
+          if (size > 50)
+            Text(
+              'CONV',
+              style: TextStyle(
+                fontSize: size * 0.12,
+                color: Colors.blue[800],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   /// Constrói um widget de fallback específico para AVIF
@@ -66,8 +90,18 @@ class UserAvatar extends StatelessWidget {
     if (profileImageBase64 != null && profileImageBase64!.isNotEmpty) {
       // Verifica se é AVIF ANTES de tentar decodificar
       if (_isAvifFormat(profileImageBase64!)) {
-        // AVIF não é suportado pelo Flutter - retorna fallback específico
-        return _buildAvifFallback();
+        // Detecta se tem cabeçalho JPEG mas conteúdo AVIF (simulação de conversão)
+        bool hasJpegHeader = profileImageBase64!.toLowerCase().contains(
+          'data:image/jpeg',
+        );
+
+        if (hasJpegHeader) {
+          // Backend simulou conversão mas o conteúdo ainda é AVIF
+          return _buildConversionInfoFallback();
+        } else {
+          // AVIF puro - não é suportado pelo Flutter
+          return _buildAvifFallback();
+        }
       }
 
       try {
