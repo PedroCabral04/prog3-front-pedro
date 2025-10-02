@@ -1,16 +1,31 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 
 class AuthService extends ChangeNotifier {
   static const String baseUrl = 'http://localhost:8000'; // Ajuste para seu IP
+  static const String _tokenKey = 'auth_token';
+  static const String _userKey = 'current_user';
+
   String? _token;
   User? _currentUser;
   late Dio _dio;
+  SharedPreferences? _prefs;
+  bool _isInitialized = false;
 
   AuthService() {
     _dio = Dio();
     _configureDio();
+  }
+
+  /// Inicializa o SharedPreferences e carrega dados salvos
+  Future<void> initializeAuth() async {
+    if (_isInitialized) return; // Evita reinicializar
+
+    _prefs = await SharedPreferences.getInstance();
+    await _loadSavedAuth();
+    _isInitialized = true;
   }
 
   void _configureDio() {
@@ -62,6 +77,64 @@ class AuthService extends ChangeNotifier {
   User? get currentUser => _currentUser;
   String? get token => _token;
 
+  /// Carrega dados de autenticação salvos no localStorage
+  Future<void> _loadSavedAuth() async {
+    try {
+      if (_prefs == null) return;
+
+      _token = _prefs!.getString(_tokenKey);
+
+      // Carrega dados do usuário se existirem
+      final userJson = _prefs!.getString(_userKey);
+      if (userJson != null) {
+        // TODO: Implementar deserialização do User quando necessário
+        // _currentUser = User.fromJson(jsonDecode(userJson));
+      }
+
+      if (_token != null) {
+        print('Token carregado do cache: ${_token!.substring(0, 20)}...');
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Erro ao carregar autenticação salva: $e');
+      // Se houver erro, limpa os dados corrompidos
+      await _clearSavedAuth();
+    }
+  }
+
+  /// Salva dados de autenticação no localStorage
+  Future<void> _saveAuth() async {
+    try {
+      if (_prefs == null) return;
+
+      if (_token != null) {
+        await _prefs!.setString(_tokenKey, _token!);
+        print('Token salvo no cache');
+      }
+
+      if (_currentUser != null) {
+        // TODO: Implementar serialização do User quando necessário
+        // await _prefs!.setString(_userKey, jsonEncode(_currentUser!.toJson()));
+        print('Dados do usuário salvos no cache');
+      }
+    } catch (e) {
+      print('Erro ao salvar autenticação: $e');
+    }
+  }
+
+  /// Remove dados de autenticação do localStorage
+  Future<void> _clearSavedAuth() async {
+    try {
+      if (_prefs != null) {
+        await _prefs!.remove(_tokenKey);
+        await _prefs!.remove(_userKey);
+        print('Cache de autenticação limpo');
+      }
+    } catch (e) {
+      print('Erro ao limpar cache: $e');
+    }
+  }
+
   Future<bool> login(String email, String password) async {
     try {
       // Primeira tentativa: POST com form-urlencoded
@@ -83,6 +156,9 @@ class AuthService extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = response.data;
         _token = data['access_token'];
+
+        // Salva o token no localStorage
+        await _saveAuth();
 
         // Buscar dados do usuário atual
         await _fetchCurrentUser();
@@ -130,6 +206,10 @@ class AuthService extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = response.data;
         _token = data['access_token'];
+
+        // Salva o token no localStorage
+        await _saveAuth();
+
         await _fetchCurrentUser();
         notifyListeners();
         return true;
@@ -171,9 +251,13 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void logout() {
+  Future<void> logout() async {
     _token = null;
     _currentUser = null;
+
+    // Remove dados do localStorage
+    await _clearSavedAuth();
+
     notifyListeners();
   }
 
