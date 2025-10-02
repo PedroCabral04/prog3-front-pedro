@@ -17,16 +17,20 @@ class UserAvatar extends StatelessWidget {
     this.backgroundColor,
   }) : super(key: key);
 
-  /// Detecta se o formato é AVIF pela assinatura do base64
+  /// Detecta se o formato é AVIF pela assinatura do base64 ou cabeçalho MIME
   bool _isAvifFormat(String base64String) {
+    // Verifica primeiro pelo cabeçalho MIME (mais confiável)
+    if (base64String.toLowerCase().contains('data:image/avif')) {
+      return true;
+    }
+
+    // Verifica pela assinatura do base64 (fallback para dados sem cabeçalho)
     String cleanBase64 = base64String;
     if (cleanBase64.contains(',')) {
       cleanBase64 = cleanBase64.split(',')[1];
     }
-    
-    // Verifica assinatura AVIF no início do base64
-    return cleanBase64.startsWith('AAAAHGZ0eXBh') || 
-           base64String.toLowerCase().contains('data:image/avif');
+
+    return cleanBase64.startsWith('AAAAHGZ0eXBh');
   }
 
   /// Constrói um widget de fallback específico para AVIF
@@ -112,7 +116,6 @@ class UserAvatar extends StatelessWidget {
 
     // Se tem URL, usa ela
     if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
-      print('UserAvatar - Usando URL: $profileImageUrl');
       return CircleAvatar(
         radius: size / 2,
         backgroundColor: backgroundColor ?? Colors.grey[300],
@@ -123,7 +126,6 @@ class UserAvatar extends StatelessWidget {
             height: size,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              print('UserAvatar - Erro ao carregar URL: $error');
               return _buildFallback();
             },
             loadingBuilder: (context, child, loadingProgress) {
@@ -143,7 +145,6 @@ class UserAvatar extends StatelessWidget {
     }
 
     // Fallback: mostra iniciais ou ícone
-    print('UserAvatar - Usando fallback');
     return CircleAvatar(
       radius: size / 2,
       backgroundColor: backgroundColor ?? Colors.blue,

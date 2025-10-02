@@ -380,16 +380,62 @@ class _UserDialogState extends State<UserDialog> {
         final bytes = file.bytes;
 
         if (bytes != null) {
+          // Determina o tipo MIME baseado na extensão do arquivo
+          String mimeType = _getMimeTypeFromExtension(
+            file.extension?.toLowerCase() ?? '',
+          );
+
+          // Cria o base64 com cabeçalho de tipo MIME
+          String base64String = base64Encode(bytes);
+          String dataUrl = 'data:$mimeType;base64,$base64String';
+
           setState(() {
-            _selectedImageBase64 = base64Encode(bytes);
+            _selectedImageBase64 = dataUrl;
             _selectedImageName = file.name;
           });
+
+          // Avisa se o formato não é suportado
+          if (mimeType == 'image/avif') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '⚠️ Formato AVIF não é suportado. Recomendamos usar JPEG, PNG ou WebP.',
+                ),
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
         }
       }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Erro ao selecionar imagem: $e')));
+    }
+  }
+
+  /// Determina o tipo MIME baseado na extensão do arquivo
+  String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'gif':
+        return 'image/gif';
+      case 'bmp':
+        return 'image/bmp';
+      case 'avif':
+        return 'image/avif';
+      case 'heic':
+      case 'heif':
+        return 'image/heif';
+      default:
+        return 'image/jpeg'; // Default para JPEG
     }
   }
 
