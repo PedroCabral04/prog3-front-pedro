@@ -7,13 +7,18 @@ class Config {
   
   // URL atual baseada no modo de compilação
   static String get apiUrl {
-    if (kReleaseMode) {
-      // Produção (flutter build web, flutter build apk, etc.)
+    // Em modo web release, sempre usa produção
+    if (kIsWeb && kReleaseMode) {
       return productionApiUrl;
-    } else {
-      // Desenvolvimento (flutter run)
+    }
+    
+    // Se não for release mode, usa desenvolvimento
+    if (!kReleaseMode) {
       return developmentApiUrl;
     }
+    
+    // Fallback para produção em outros casos
+    return productionApiUrl;
   }
   
   // Também pode verificar se está rodando na web
