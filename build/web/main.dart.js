@@ -27521,7 +27521,10 @@ b=o}s=b+2
 if(p===s)return s
 if(a.charCodeAt(s)!==47)return q
 return b+3},
-axq(){return"https://programacaiii-api.onrender.com"},
+axq(){var s=window.location.href
+s.toString
+if(B.c.p(s,"localhost")||B.c.p(s,"127.0.0.1"))return"http://localhost:8000"
+return"https://programacaiii-api.onrender.com"},
 aNY(a){var s,r,q=A.b([],t.s)
 for(s=0;s<a.length;++s){r=a.key(s)
 r.toString

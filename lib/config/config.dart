@@ -1,24 +1,33 @@
 import 'package:flutter/foundation.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 class Config {
   // URLs da API
   static const String productionApiUrl = 'https://programacaiii-api.onrender.com';
   static const String developmentApiUrl = 'http://localhost:8000';
   
-  // URL atual baseada no modo de compilação
+  // URL atual baseada na URL do navegador
   static String get apiUrl {
-    // Em modo web release, sempre usa produção
-    if (kIsWeb && kReleaseMode) {
+    // Se estiver rodando na web, verifica a URL atual
+    if (kIsWeb) {
+      final currentUrl = html.window.location.href;
+      
+      // Se a URL contém localhost ou 127.0.0.1, usa desenvolvimento
+      if (currentUrl.contains('localhost') || currentUrl.contains('127.0.0.1')) {
+        return developmentApiUrl;
+      }
+      
+      // Caso contrário, usa produção
       return productionApiUrl;
     }
     
-    // Se não for release mode, usa desenvolvimento
-    if (!kReleaseMode) {
-      return developmentApiUrl;
+    // Para mobile/desktop, usa o modo de compilação
+    if (kReleaseMode) {
+      return productionApiUrl;
     }
     
-    // Fallback para produção em outros casos
-    return productionApiUrl;
+    return developmentApiUrl;
   }
   
   // Também pode verificar se está rodando na web
