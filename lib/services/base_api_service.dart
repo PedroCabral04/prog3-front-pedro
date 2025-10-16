@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 import 'auth_service.dart';
+import '../config/config.dart';
 
 abstract class BaseApiService {
-  static const String baseUrl = 'http://localhost:8000';
+  // Usa a configuração centralizada
+  static String get baseUrl => Config.apiUrl;
+  
   final AuthService authService;
   late Dio dio;
 
@@ -13,8 +16,8 @@ abstract class BaseApiService {
 
   void _configureDio() {
     dio.options.baseUrl = baseUrl;
-    dio.options.connectTimeout = const Duration(seconds: 10);
-    dio.options.receiveTimeout = const Duration(seconds: 10);
+    dio.options.connectTimeout = Config.connectTimeout;
+    dio.options.receiveTimeout = Config.receiveTimeout;
 
     // Interceptor para adicionar token automaticamente
     dio.interceptors.add(
