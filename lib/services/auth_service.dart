@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8000'; // Ajuste para seu IP
+  static const String baseUrl = Config.apiUrl; // Ajuste para seu IP
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'current_user';
 
