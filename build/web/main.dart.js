@@ -28103,7 +28103,7 @@ return b+3},
 a3d(){var s=window.location.href
 s.toString
 if(B.c.p(s,"localhost")||B.c.p(s,"127.0.0.1"))return"http://localhost:8000"
-return"https://programacaoiii-api-pedro.onrender.com"},
+return"https://prog3-render-1.onrender.com"},
 aPX(a){var s,r,q=A.b([],t.s)
 for(s=0;s<a.length;++s){r=a.key(s)
 r.toString
